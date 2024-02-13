@@ -1,8 +1,8 @@
 # vim: set fileencoding=utf-8
 """
-pythoneda/sandbox/poc/cac/__init__.py
+pythoneda/sandbox/poc/cac/python_default_constructor.py
 
-This file ensures pythoneda.sandbox.poc.cac is a namespace.
+This file declares the PythonDefaultConstructor class.
 
 Copyright (C) 2024-today rydnr's pythoneda-sandbox/poccac
 
@@ -19,12 +19,30 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-__path__ = __import__("pkgutil").extend_path(__path__, __name__)
-
 from .python_constructor import PythonConstructor
-from .python_default_constructor import PythonDefaultConstructor
-from .python_import import PythonImport
-from .pythoneda_sandbox_poc_cac_sample_py import PythonedaSandboxPocCacSamplePy
+
+
+class PythonDefaultConstructor(PythonConstructor):
+    """
+    Models the Python default constructor.
+
+    Class name: PythonDefaultConstructor
+
+    Responsibilities:
+        - Represent the Python default constructor
+
+    Collaborators:
+        - None
+    """
+
+    def __init__(self, className: str):
+        """
+        Creates a new PythonDefaultConstructor instance.
+        :param className: The class name.
+        :type className: str
+        """
+        super().__init__(f"Creates a new {className} instance.")
+
 
 # vim: syntax=python ts=4 sw=4 sts=4 tw=79 sr et
 # Local Variables:
