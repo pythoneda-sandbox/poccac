@@ -24,7 +24,11 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 from .python_constructor import PythonConstructor
 from .python_default_constructor import PythonDefaultConstructor
 from .python_import import PythonImport
+from .method_parameter import MethodParameter
+from .method_def import MethodDef
+from .python_method_def import PythonMethodDef
 from .pythoneda_sandbox_poc_cac_sample_py import PythonedaSandboxPocCacSamplePy
+
 
 # vim: syntax=python ts=4 sw=4 sts=4 tw=79 sr et
 # Local Variables:

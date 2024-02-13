@@ -22,6 +22,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from io import StringIO
 from .python_default_constructor import PythonDefaultConstructor
 from .python_import import PythonImport
+from .method_parameter import MethodParameter
+from .python_method_def import PythonMethodDef
+from .python_method import PythonMethod
 from pythoneda.shared import BaseObject
 from stringtemplate3 import StringTemplateGroup
 from typing import List
@@ -68,6 +71,18 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>."""
         self._class_responsibilities = ["Show a sample code."]
         self._class_collaborators = []
         self._constructor = PythonDefaultConstructor(self.name)
+        self._method_defs = [
+            PythonMethodDef(
+                "add",
+                "int",
+                "Adds two numbers.",
+                [
+                    MethodParameter("x", "int", "The first number."),
+                    MethodParameter("y", "int", "The second number."),
+                ],
+                "The sum of the two numbers.",
+            )
+        ]
 
     @property
     def relative_file_path(self) -> str:
@@ -160,13 +175,21 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>."""
         return self._constructor
 
     @property
-    def content(self) -> str:
+    def methods(self) -> List[PythonMethod]:
         """
-        Retrieves the file content.
-        :return: Such content.
-        :rtype: str
+        Retrieves the methods.
+        :return: Such methods.
+        :rtype: List[pythoneda.sandbox.poc.cac.PythonMethod]
         """
-        return self._generate_content()
+        return list(map(lambda m: self._resolve(m), self._method_defs))
+
+    def _resolve(self, methodDef: PythonMethodDef) -> PythonMethod:
+        """
+        Resolves given method definition.
+        :param methodDef: The method definition.
+        :type methodDef: pythoneda.sandbox.poc.cac.PythonMethodDef
+        """
+        return PythonMethod(methodDef, "return x + y")
 
     @property
     def template(self) -> str:
@@ -223,6 +246,9 @@ class <inst.name>(<parents(parents=inst.parents)>):
         <collaborators(collaborators=inst.class_collaborators)>
     """
     <inst.constructor.content>
+<if(inst.methods)>
+
+    <methods(methods=inst.methods)><endif>
 >>
 
 collaborators(collaborators) ::= <<
@@ -251,6 +277,13 @@ editor_settings() ::= <<
 # End:
 >>
 
+// methods template
+// - methods: The methods.
+methods(methods) ::= <<
+<methods: { method |<method.method_def.content>
+    <method.body>}; separator="\n\n" >
+>>
+
 //  root template
 //  - inst: The Sample instance.
 root(inst) ::= <<
@@ -273,7 +306,8 @@ root(inst) ::= <<
 >>
 '''
 
-    def _generate_content(self) -> str:
+    @property
+    async def content(self) -> str:
         """
         Generates the file content.
         :return: Such content.
