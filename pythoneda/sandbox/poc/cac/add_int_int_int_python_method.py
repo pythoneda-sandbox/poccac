@@ -1,8 +1,8 @@
 # vim: set fileencoding=utf-8
 """
-pythoneda/sandbox/poc/cac/python_method.py
+pythoneda/sandbox/poc/cac/add_int_int_int_python_method.py
 
-This file declares the PythonMethod class.
+This file declares the AddIntIntIntPythonMethod class.
 
 Copyright (C) 2024-today rydnr's pythoneda-sandbox/poccac
 
@@ -19,47 +19,32 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import abc
+from .add_int_int_int_python_method_def import AddIntIntIntPythonMethodDef
 from .method_def import MethodDef
-from pythoneda.shared import attribute, BaseObject, primary_key_attribute
+from .python_method import PythonMethod
+from pythoneda.shared import primary_key_attribute
 
 
-class PythonMethod(BaseObject, abc.ABC):
+class AddIntIntIntPythonMethod(PythonMethod):
     """
-    Models Python methods.
+    The implementation of add(self, x:int, y:int) -> int: Python method.
 
-    Class name: PythonMethod
+    Class name: AddIntIntIntPythonMethod
 
     Responsibilities:
-        - Represent a Python method.
+        - Represent the trivial implementation of add(self, x:int, y:int) -> int: in Python.
 
     Collaborators:
         - None
     """
 
-    def __init__(self, methodDef: MethodDef):
+    def __init__(self):
         """
-        Creates a new PythonMethod instance.
-        :param methodDef: The method definition.
-        :type methodDef: pythoneda.sandbox.poc.cac.MethodDef
-        :param body: The method body.
-        :type body: str
+        Creates a new AddIntIntIntPythonMethod instance.
         """
-        super().__init__()
-        self._method_def = methodDef
+        super().__init__(AddIntIntIntPythonMethodDef())
 
     @property
-    @primary_key_attribute
-    def method_def(self) -> MethodDef:
-        """
-        Retrieves the method definition.
-        :return: Such definition.
-        :rtype: pythoneda.sandbox.poc.cac.MethodDef
-        """
-        return self._method_def
-
-    @property
-    @abc.abstractmethod
     @primary_key_attribute
     def body(self) -> str:
         """
@@ -67,7 +52,7 @@ class PythonMethod(BaseObject, abc.ABC):
         :return: The content.
         :rtype: str
         """
-        pass
+        return "return x + y"
 
 
 # vim: syntax=python ts=4 sw=4 sts=4 tw=79 sr et

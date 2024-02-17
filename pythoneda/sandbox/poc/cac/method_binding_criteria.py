@@ -1,8 +1,8 @@
 # vim: set fileencoding=utf-8
 """
-pythoneda/sandbox/poc/cac/__init__.py
+pythoneda/sandbox/poc/cac/method_binding_criteria.py
 
-This file ensures pythoneda.sandbox.poc.cac is a namespace.
+This file declares the MethodBindingCriteria class.
 
 Copyright (C) 2024-today rydnr's pythoneda-sandbox/poccac
 
@@ -19,21 +19,27 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-__path__ = __import__("pkgutil").extend_path(__path__, __name__)
+from pythoneda.shared import BaseObject
 
-from .python_constructor import PythonConstructor
-from .python_default_constructor import PythonDefaultConstructor
-from .python_import import PythonImport
-from .method_parameter import MethodParameter
-from .method_def import MethodDef
-from .method_binding_criteria import MethodBindingCriteria
-from .python_method_def import PythonMethodDef
-from .default_method_binding_criteria import DefaultMethodBindingCriteria
-from .empty_body_python_method_binding_criteria import (
-    EmptyBodyPythonMethodBindingCriteria,
-)
-from .empty_body_python_method import EmptyBodyPythonMethod
-from .pythoneda_sandbox_poc_cac_sample_py import PythonedaSandboxPocCacSamplePy
+
+class MethodBindingCriteria(BaseObject):
+    """
+    Used to determine the binding of method implementations to MethodDef instances.
+
+    Class name: MethodBindingCriteria
+
+    Responsibilities:
+        - Represent criteria for resolving method implementations.
+
+    Collaborators:
+        - None
+    """
+
+    def __init__(self):
+        """
+        Creates a new MethodBindingCriteria instance.
+        """
+        super().__init__()
 
 
 # vim: syntax=python ts=4 sw=4 sts=4 tw=79 sr et

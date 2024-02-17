@@ -1,8 +1,8 @@
 # vim: set fileencoding=utf-8
 """
-pythoneda/sandbox/poc/cac/python_method.py
+pythoneda/sandbox/poc/cac/default_method_binding_criteria.py
 
-This file declares the PythonMethod class.
+This file declares the DefaultMethodBindingCriteria class.
 
 Copyright (C) 2024-today rydnr's pythoneda-sandbox/poccac
 
@@ -19,55 +19,39 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import abc
+from .method_binding_criteria import MethodBindingCriteria
 from .method_def import MethodDef
-from pythoneda.shared import attribute, BaseObject, primary_key_attribute
+from .python_method import PythonMethod
 
 
-class PythonMethod(BaseObject, abc.ABC):
+class DefaultMethodBindingCriteria(MethodBindingCriteria):
     """
-    Models Python methods.
+    Defines the default criteria for resolving method implementations.
 
-    Class name: PythonMethod
+    Class name: DefaultMethodBindingCriteria
 
     Responsibilities:
-        - Represent a Python method.
+        - Represent the default criteria for resolving method implementations.
 
     Collaborators:
         - None
     """
 
-    def __init__(self, methodDef: MethodDef):
+    def __init__(self):
         """
-        Creates a new PythonMethod instance.
-        :param methodDef: The method definition.
-        :type methodDef: pythoneda.sandbox.poc.cac.MethodDef
-        :param body: The method body.
-        :type body: str
+        Creates a new DefaultMethodBindingCriteria instance.
         """
         super().__init__()
-        self._method_def = methodDef
 
-    @property
-    @primary_key_attribute
-    def method_def(self) -> MethodDef:
+    def is_satisfied_by(self, methodDef: MethodDef, method: PythonMethod) -> bool:
         """
-        Retrieves the method definition.
-        :return: Such definition.
-        :rtype: pythoneda.sandbox.poc.cac.MethodDef
+        Determines if the given method satisfies the criteria.
+        :param method: The method implementation to evaluate.
+        :type method: pythoneda.sandbox.poc.cac.PythonMethod
+        :return: True if the method satisfies the criteria, False otherwise.
+        :rtype: bool
         """
-        return self._method_def
-
-    @property
-    @abc.abstractmethod
-    @primary_key_attribute
-    def body(self) -> str:
-        """
-        Retrieves the method body.
-        :return: The content.
-        :rtype: str
-        """
-        pass
+        return method.method_def == methodDef
 
 
 # vim: syntax=python ts=4 sw=4 sts=4 tw=79 sr et

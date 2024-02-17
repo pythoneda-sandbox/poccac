@@ -20,12 +20,12 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import abc
-from pythoneda.shared import attribute, BaseObject, primary_key_attribute
+from pythoneda.shared import attribute, primary_key_attribute, ValueObject
 from .method_parameter import MethodParameter
 from typing import List
 
 
-class MethodDef(BaseObject):
+class MethodDef(ValueObject):
     """
     Models method definitions.
 

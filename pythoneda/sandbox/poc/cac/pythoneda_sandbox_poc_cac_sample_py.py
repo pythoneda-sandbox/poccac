@@ -20,9 +20,13 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 from io import StringIO
+from .add_int_int_int_python_method import AddIntIntIntPythonMethod
+from .add_int_int_int_python_method_def import AddIntIntIntPythonMethodDef
+from .empty_body_python_method import EmptyBodyPythonMethod
+from .method_binding_criteria import MethodBindingCriteria
+from .method_parameter import MethodParameter
 from .python_default_constructor import PythonDefaultConstructor
 from .python_import import PythonImport
-from .method_parameter import MethodParameter
 from .python_method_def import PythonMethodDef
 from .python_method import PythonMethod
 from pythoneda.shared import BaseObject
@@ -43,11 +47,12 @@ class PythonedaSandboxPocCacSamplePy(BaseObject):
         - None
     """
 
-    def __init__(self):
+    def __init__(self, methodBindingCriteria: MethodBindingCriteria = None):
         """
         Creates a new PythonedaSandboxPocCacSamplePy instance.
         """
         super().__init__()
+        self._method_binding_criteria = methodBindingCriteria
         self._relative_file_path = "pythoneda/sandbox/poc/cac/sample.py"
         self._file_description = "This file defines the Sample class."
         self._copyright_preamble = """Copyright (C) 2024-today rydnr's https://github.com/pythoneda-sandbox/poccac
@@ -71,18 +76,16 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>."""
         self._class_responsibilities = ["Show a sample code."]
         self._class_collaborators = []
         self._constructor = PythonDefaultConstructor(self.name)
-        self._method_defs = [
-            PythonMethodDef(
-                "add",
-                "int",
-                "Adds two numbers.",
-                [
-                    MethodParameter("x", "int", "The first number."),
-                    MethodParameter("y", "int", "The second number."),
-                ],
-                "The sum of the two numbers.",
-            )
-        ]
+        self._method_defs = [AddIntIntIntPythonMethodDef()]
+
+    @property
+    def method_binding_criteria(self) -> MethodBindingCriteria:
+        """
+        Retrieves the method binding criteria.
+        :return: Such criteria.
+        :rtype: pythoneda.sandbox.poc.cac.MethodBindingCriteria
+        """
+        return self._method_binding_criteria
 
     @property
     def relative_file_path(self) -> str:
@@ -189,7 +192,19 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>."""
         :param methodDef: The method definition.
         :type methodDef: pythoneda.sandbox.poc.cac.PythonMethodDef
         """
-        return PythonMethod(methodDef, "return x + y")
+        available_methods = [
+            AddIntIntIntPythonMethod(),
+            EmptyBodyPythonMethod(AddIntIntIntPythonMethodDef()),
+        ]
+
+        result = None
+
+        for method in available_methods:
+            if self.method_binding_criteria.is_satisfied_by(methodDef, method):
+                result = method
+                break
+
+        return result
 
     @property
     def template(self) -> str:

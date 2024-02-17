@@ -1,8 +1,8 @@
 # vim: set fileencoding=utf-8
 """
-pythoneda/sandbox/poc/cac/__init__.py
+pythoneda/sandbox/poc/cac/add_int_int_int_python_method_def.py
 
-This file ensures pythoneda.sandbox.poc.cac is a namespace.
+This file declares the AddIntIntIntPythonMethodDef class.
 
 Copyright (C) 2024-today rydnr's pythoneda-sandbox/poccac
 
@@ -19,21 +19,38 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-__path__ = __import__("pkgutil").extend_path(__path__, __name__)
-
-from .python_constructor import PythonConstructor
-from .python_default_constructor import PythonDefaultConstructor
-from .python_import import PythonImport
 from .method_parameter import MethodParameter
-from .method_def import MethodDef
-from .method_binding_criteria import MethodBindingCriteria
 from .python_method_def import PythonMethodDef
-from .default_method_binding_criteria import DefaultMethodBindingCriteria
-from .empty_body_python_method_binding_criteria import (
-    EmptyBodyPythonMethodBindingCriteria,
-)
-from .empty_body_python_method import EmptyBodyPythonMethod
-from .pythoneda_sandbox_poc_cac_sample_py import PythonedaSandboxPocCacSamplePy
+from pythoneda.shared import primary_key_attribute
+
+
+class AddIntIntIntPythonMethodDef(PythonMethodDef):
+    """
+    The definition of add(self, x:int, y:int) -> int: Python method.
+
+    Class name: AddIntIntIntPythonMethodDef
+
+    Responsibilities:
+        - Represent the Python definition of the add(self, x:int, y:int) -> int: method.
+
+    Collaborators:
+        - None
+    """
+
+    def __init__(self):
+        """
+        Creates a new AddIntIntIntPythonMethodDef instance.
+        """
+        super().__init__(
+            "add",
+            "int",
+            "Adds two numbers.",
+            [
+                MethodParameter("x", "int", "The first number."),
+                MethodParameter("y", "int", "The second number."),
+            ],
+            "The sum of the two numbers.",
+        )
 
 
 # vim: syntax=python ts=4 sw=4 sts=4 tw=79 sr et

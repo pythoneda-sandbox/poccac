@@ -1,8 +1,8 @@
 # vim: set fileencoding=utf-8
 """
-pythoneda/sandbox/poc/cac/python_method.py
+pythoneda/sandbox/poc/cac/empty_body_python_method.py
 
-This file declares the PythonMethod class.
+This file declares the EmptyBodyPythonMethod class.
 
 Copyright (C) 2024-today rydnr's pythoneda-sandbox/poccac
 
@@ -19,47 +19,33 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import abc
-from .method_def import MethodDef
-from pythoneda.shared import attribute, BaseObject, primary_key_attribute
+from .python_method import PythonMethod
+from .python_method_def import PythonMethodDef
+from pythoneda.shared import primary_key_attribute
 
 
-class PythonMethod(BaseObject, abc.ABC):
+class EmptyBodyPythonMethod(PythonMethod):
     """
-    Models Python methods.
+    An empty implementation of any Python method.
 
-    Class name: PythonMethod
+    Class name: EmptyBodyPythonMethod
 
     Responsibilities:
-        - Represent a Python method.
+        - Represent the empty implementation of any Python method.
 
     Collaborators:
         - None
     """
 
-    def __init__(self, methodDef: MethodDef):
+    def __init__(self, pythonMethodDef: PythonMethodDef):
         """
-        Creates a new PythonMethod instance.
-        :param methodDef: The method definition.
-        :type methodDef: pythoneda.sandbox.poc.cac.MethodDef
-        :param body: The method body.
-        :type body: str
+        Creates a new EmptyBodyPythonMethod instance.
+        :param pythonMethodDef: The method definition.
+        :type pythonMethodDef: pythoneda.sandbox.poc.cac.PythonMethodDef
         """
-        super().__init__()
-        self._method_def = methodDef
+        super().__init__(pythonMethodDef)
 
     @property
-    @primary_key_attribute
-    def method_def(self) -> MethodDef:
-        """
-        Retrieves the method definition.
-        :return: Such definition.
-        :rtype: pythoneda.sandbox.poc.cac.MethodDef
-        """
-        return self._method_def
-
-    @property
-    @abc.abstractmethod
     @primary_key_attribute
     def body(self) -> str:
         """
@@ -67,7 +53,7 @@ class PythonMethod(BaseObject, abc.ABC):
         :return: The content.
         :rtype: str
         """
-        pass
+        return "pass"
 
 
 # vim: syntax=python ts=4 sw=4 sts=4 tw=79 sr et
