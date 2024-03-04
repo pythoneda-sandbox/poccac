@@ -4,7 +4,6 @@ Proof of concept for code-as-code
 
 ## How to declare it in your flake
 
-python ~/github/pythoneda/pythoneda-tools-artifact/new-domain/pythoneda/tools/artifact/new_domain/application/new_domain_app.py -o pythoneda-shared-python -n shell -t "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" -g "D8DF2D915F27510072DFF42160856541692CA3C3" -p pythoneda.shared.shellox.removeme -d 'shared domain for shell operations'
 Check the latest tag of the definition repository: https://github.com/pythoneda-sandbox-def/poccac, and use it instead of the `[version]` placeholder below.
 
 ```nix
