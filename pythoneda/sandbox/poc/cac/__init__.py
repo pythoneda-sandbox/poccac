@@ -34,6 +34,7 @@ from .empty_body_python_method_binding_criteria import (
 )
 from .empty_body_python_method import EmptyBodyPythonMethod
 from .pythoneda_sandbox_poc_cac_sample_py import PythonedaSandboxPocCacSamplePy
+from .sample import Sample
 
 
 # vim: syntax=python ts=4 sw=4 sts=4 tw=79 sr et
