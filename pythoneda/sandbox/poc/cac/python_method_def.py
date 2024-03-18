@@ -109,7 +109,7 @@ parameter_docs(parameters) ::= <<
 //  root template
 //  - inst: The Sample instance.
 root(inst) ::= <<
-def <inst.name>(self<if(inst.parameters)>, <parameters(parameters=inst.parameters)><endif>) -> <inst.return_type>:
+def <inst.name>(self<if(inst.parameters)>, <parameters(parameters=inst.parameters)><endif>)<if(inst.return_type)> -> <inst.return_type><endif>:
     """
     <inst.doc><if(inst.parameters)>
     <parameter_docs(parameters=inst.parameters)>

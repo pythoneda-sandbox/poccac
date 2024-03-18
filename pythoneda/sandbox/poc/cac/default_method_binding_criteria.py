@@ -47,7 +47,7 @@ class DefaultMethodBindingCriteria(MethodBindingCriteria):
         """
         Determines if the given method satisfies the criteria.
         :param method: The method implementation to evaluate.
-        :type method: pythoneda.sandbox.poc.cac.PythonMethod
+        :type method: pythoneda.sandbox.poc.cac.MethodDef
         :return: True if the method satisfies the criteria, False otherwise.
         :rtype: bool
         """

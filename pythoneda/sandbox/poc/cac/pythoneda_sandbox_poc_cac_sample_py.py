@@ -25,7 +25,6 @@ from .add_int_int_int_python_method_def import AddIntIntIntPythonMethodDef
 from .empty_body_python_method import EmptyBodyPythonMethod
 from .method_binding_criteria import MethodBindingCriteria
 from .method_parameter import MethodParameter
-from .python_default_constructor import PythonDefaultConstructor
 from .python_import import PythonImport
 from .python_method_def import PythonMethodDef
 from .python_method import PythonMethod
@@ -75,7 +74,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>."""
         self._class_description = "A class used to show the Code-as-Code approach."
         self._class_responsibilities = ["Show a sample code."]
         self._class_collaborators = []
-        self._constructor = PythonDefaultConstructor(self.name)
+        self._constructor = None  # OfficialPythonMethod(self.name)
         self._method_defs = [AddIntIntIntPythonMethodDef()]
 
     @property
@@ -169,11 +168,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>."""
         return self._class_collaborators
 
     @property
-    def constructor(self) -> PythonDefaultConstructor:
+    def constructor(self) -> PythonMethod:
         """
         Retrieves the constructor.
         :return: Such constructor.
-        :rtype: pythoneda.sandbox.poc.cac.python_default_constructor.PythonDefaultConstructor
+        :rtype: pythoneda.sandbox.poc.cac.PythonMethod
         """
         return self._constructor
 

@@ -1,8 +1,8 @@
 # vim: set fileencoding=utf-8
 """
-pythoneda/sandbox/poc/cac/python_method.py
+pythoneda/sandbox/poc/cac/official_python_method.py
 
-This file declares the PythonMethod class.
+This file declares the OfficialPythonMethod class.
 
 Copyright (C) 2024-today rydnr's pythoneda-sandbox/poccac
 
@@ -19,54 +19,62 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import abc
 from .method_def import MethodDef
-from pythoneda.shared import attribute, BaseObject, primary_key_attribute
+from .python_method import PythonMethod
+from pythoneda.shared import primary_key_attribute
+from typing import Callable
 
 
-class PythonMethod(BaseObject, abc.ABC):
+class OfficialPythonMethod(PythonMethod):
     """
-    Models Python methods.
+    Models Python methods read directly from .py files.
 
-    Class name: PythonMethod
+    Class name: OfficialPythonMethod
 
     Responsibilities:
-        - Represent a Python method.
+        - Represent a Python method from a .py file.
 
     Collaborators:
         - None
     """
 
-    def __init__(self, methodDef: MethodDef):
+    def __init__(self, methodDef: MethodDef, method: Callable):
         """
         Creates a new PythonMethod instance.
         :param methodDef: The method definition.
         :type methodDef: pythoneda.sandbox.poc.cac.MethodDef
-        :param body: The method body.
-        :type body: str
+        :param method: The method.
+        :type method: Callable
         """
-        super().__init__()
-        self._method_def = methodDef
+        super().__init__(methodDef)
+        self._method = method
 
     @property
-    @primary_key_attribute
-    def method_def(self) -> MethodDef:
+    def method(self) -> Callable:
         """
-        Retrieves the method definition.
-        :return: Such definition.
-        :rtype: pythoneda.sandbox.poc.cac.MethodDef
+        Retrieves the method.
+        :return: Such instance.
+        :rtype: Callable
         """
-        return self._method_def
+        return self._method
 
     @property
-    @abc.abstractmethod
     def body(self) -> str:
         """
         Retrieves the method body.
         :return: The content.
         :rtype: str
         """
-        pass
+        import inspect
+
+        actual_method = self.method
+        if isinstance(actual_method, property):
+            actual_method = actual_method.fget
+
+        if isinstance(actual_method, classmethod):
+            actual_method = actual_method.__func__
+
+        return inspect.getsource(actual_method)
 
 
 # vim: syntax=python ts=4 sw=4 sts=4 tw=79 sr et

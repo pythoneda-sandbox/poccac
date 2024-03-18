@@ -21,8 +21,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
-from .python_constructor import PythonConstructor
-from .python_default_constructor import PythonDefaultConstructor
 from .python_import import PythonImport
 from .method_parameter import MethodParameter
 from .method_def import MethodDef
@@ -35,6 +33,7 @@ from .empty_body_python_method_binding_criteria import (
 from .empty_body_python_method import EmptyBodyPythonMethod
 from .pythoneda_sandbox_poc_cac_sample_py import PythonedaSandboxPocCacSamplePy
 from .sample import Sample
+from .class_artifact import ClassArtifact
 
 
 # vim: syntax=python ts=4 sw=4 sts=4 tw=79 sr et

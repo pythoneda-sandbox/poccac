@@ -22,7 +22,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import abc
 from pythoneda.shared import attribute, primary_key_attribute, ValueObject
 from .method_parameter import MethodParameter
-from typing import List
+from typing import Callable, List
 
 
 class MethodDef(ValueObject):
@@ -45,6 +45,7 @@ class MethodDef(ValueObject):
         doc: str,
         parameters: List[MethodParameter] = [],
         returnDoc: str = None,
+        method: Callable = None,
     ):
         """
         Creates a new MethodDef instance.
@@ -58,6 +59,8 @@ class MethodDef(ValueObject):
         :type defaultValue: str
         :param returnDoc: The documentation for the return value.
         :type returnDoc: str
+        :param method: The method instance.
+        :type method: Callable
         """
         super().__init__()
         self._name = name
@@ -65,6 +68,34 @@ class MethodDef(ValueObject):
         self._doc = doc
         self._parameters = parameters
         self._return_doc = returnDoc
+        self._method = method
+
+    @classmethod
+    def from_method(cls, method: Callable) -> "MethodDef":
+        """
+        Creates a MethodDef instance for given method.
+        :param method: The method.
+        :type method: function
+        :return: The new MethodDef instance.
+        :rtype: Callable
+        """
+        import inspect
+
+        actual_method = method
+        if isinstance(actual_method, property):
+            actual_method = actual_method.fget
+
+        if isinstance(actual_method, classmethod):
+            actual_method = actual_method.__func__
+
+        signature = inspect.signature(actual_method)
+        return MethodDef(
+            actual_method.__name__,
+            signature.return_annotation,
+            method.__doc__,
+            "[no return doc]",
+            method,
+        )
 
     @property
     @primary_key_attribute
@@ -115,6 +146,16 @@ class MethodDef(ValueObject):
         :rtype: str
         """
         return self._return_doc
+
+    @property
+    @attribute
+    def method(self) -> Callable:
+        """
+        Retrieves the method instance.
+        :return: Such instance.
+        :rtype: Callable
+        """
+        return self._method
 
     @property
     @abc.abstractmethod
