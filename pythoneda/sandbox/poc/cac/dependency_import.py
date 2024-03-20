@@ -1,8 +1,8 @@
 # vim: set fileencoding=utf-8
 """
-pythoneda/sandbox/poc/cac/__init__.py
+pythoneda/sandbox/poc/cac/dependency_import.py
 
-This file ensures pythoneda.sandbox.poc.cac is a namespace.
+This file declares the DependencyImport class.
 
 Copyright (C) 2024-today rydnr's pythoneda-sandbox/poccac
 
@@ -19,23 +19,40 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-__path__ = __import__("pkgutil").extend_path(__path__, __name__)
+from pythoneda.shared import BaseObject, primary_key_attribute
 
-from .dependency_import import DependencyImport
-from .python_import import PythonImport
-from .python_import_find import PythonImportFind
-from .method_parameter import MethodParameter
-from .method_def import MethodDef
-from .method_binding_criteria import MethodBindingCriteria
-from .python_method_def import PythonMethodDef
-from .default_method_binding_criteria import DefaultMethodBindingCriteria
-from .empty_body_python_method_binding_criteria import (
-    EmptyBodyPythonMethodBindingCriteria,
-)
-from .empty_body_python_method import EmptyBodyPythonMethod
-from .pythoneda_sandbox_poc_cac_sample_py import PythonedaSandboxPocCacSamplePy
-from .sample import Sample
-from .class_artifact import ClassArtifact
+
+class DependencyImport(BaseObject):
+    """
+    Models imports.
+
+    Class name: DependencyImport
+
+    Responsibilities:
+        - Represent an import.
+
+    Collaborators:
+        - None
+    """
+
+    def __init__(self, package: str):
+        """
+        Creates a new Import instance.
+        :param package: The import package.
+        :type package: str
+        """
+        super().__init__()
+        self._package = package
+
+    @property
+    @primary_key_attribute
+    def package(self) -> str:
+        """
+        Retrieves the package
+        :return: Such package.
+        :rtype: str
+        """
+        return self._package
 
 
 # vim: syntax=python ts=4 sw=4 sts=4 tw=79 sr et

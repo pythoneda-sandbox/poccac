@@ -20,8 +20,10 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import abc
+from .dependency_import import DependencyImport
 from .method_def import MethodDef
 from pythoneda.shared import attribute, BaseObject, primary_key_attribute
+from typing import Callable, List, Type
 
 
 class PythonMethod(BaseObject, abc.ABC):
@@ -67,6 +69,43 @@ class PythonMethod(BaseObject, abc.ABC):
         :rtype: str
         """
         pass
+
+    @property
+    @abc.abstractmethod
+    def imports(self) -> List[DependencyImport]:
+        """
+        Retrieves the dependencies of the method.
+        :return: The dependencies.
+        :rtype: List[pythoneda.sandbox.poc.cac.DependencyImport]
+        """
+        pass
+
+    @classmethod
+    def class_of_method(cls, method: Callable) -> str:
+        """
+        Retrieves the class of given method.
+        :param method: The method.
+        :type method: Callable
+        :return: Its class.
+        :rtype: Type
+        """
+        result = None
+        if method.__self__:
+            result = method.__self__.__class__
+        return result
+
+    @classmethod
+    def class_source(cls, target: Type) -> str:
+        """
+        Retrieves the source code of given class.
+        :param target: The class.
+        :type target: Type
+        :return: Such code.
+        :rtype: str
+        """
+        import inspect
+
+        return inspect.getsource(target)
 
 
 # vim: syntax=python ts=4 sw=4 sts=4 tw=79 sr et

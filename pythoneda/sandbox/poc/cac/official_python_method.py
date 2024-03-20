@@ -19,10 +19,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
+from .dependency_import import DependencyImport
 from .method_def import MethodDef
+from .python_import_find import PythonImportFind
 from .python_method import PythonMethod
 from pythoneda.shared import primary_key_attribute
-from typing import Callable
+from typing import Callable, List, Type
 
 
 class OfficialPythonMethod(PythonMethod):
@@ -38,16 +40,19 @@ class OfficialPythonMethod(PythonMethod):
         - None
     """
 
-    def __init__(self, methodDef: MethodDef, method: Callable):
+    def __init__(self, methodDef: MethodDef, method: Callable, enclosingClass: Type):
         """
         Creates a new PythonMethod instance.
         :param methodDef: The method definition.
         :type methodDef: pythoneda.sandbox.poc.cac.MethodDef
         :param method: The method.
         :type method: Callable
+        :param enclosingClass: The class that encloses the method.
+        :type enclosingClass: Type
         """
         super().__init__(methodDef)
         self._method = method
+        self._enclosing_class = enclosingClass
 
     @property
     def method(self) -> Callable:
@@ -57,6 +62,15 @@ class OfficialPythonMethod(PythonMethod):
         :rtype: Callable
         """
         return self._method
+
+    @property
+    def enclosing_class(self) -> Type:
+        """
+        Retrieves the enclosing class.
+        :return: Such class.
+        :rtype: Type
+        """
+        return self._enclosing_class
 
     @property
     def body(self) -> str:
@@ -75,6 +89,26 @@ class OfficialPythonMethod(PythonMethod):
             actual_method = actual_method.__func__
 
         return inspect.getsource(actual_method)
+
+    @property
+    def imports(self) -> List[DependencyImport]:
+        """
+        Retrieves the dependencies of the method.
+        :return: The dependencies.
+        :rtype: List[pythoneda.sandbox.poc.cac.DependencyImport]
+        """
+        import inspect
+
+        actual_method = self.method
+        if isinstance(actual_method, property):
+            actual_method = actual_method.fget
+
+        if isinstance(actual_method, classmethod):
+            actual_method = actual_method.__func__
+
+        return PythonImportFind(
+            inspect.getsource(self.enclosing_class), actual_method.__name__
+        ).imports
 
 
 # vim: syntax=python ts=4 sw=4 sts=4 tw=79 sr et

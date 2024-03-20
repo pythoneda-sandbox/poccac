@@ -21,6 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 from .method_def import MethodDef
 from .method_parameter import MethodParameter
+from .python_import import PythonImport
 from pythoneda.shared import attribute, BaseObject, primary_key_attribute
 from io import StringIO
 from stringtemplate3 import StringTemplateGroup
@@ -47,6 +48,7 @@ class PythonMethodDef(MethodDef):
         doc: str,
         parameters: List[MethodParameter] = [],
         returnDoc: str = None,
+        typeImports: List[PythonImport] = [],
     ):
         """
         Creates a new PythonMethodDef instance.
@@ -61,7 +63,7 @@ class PythonMethodDef(MethodDef):
         :param returnDoc: The documentation of the return value.
         :type returnDoc: str
         """
-        super().__init__(name, returnType, doc, parameters, returnDoc)
+        super().__init__(name, returnType, doc, parameters, returnDoc, typeImports)
 
     @property
     def template(self) -> str:

@@ -19,17 +19,18 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-from pythoneda.shared import BaseObject, primary_key_attribute
+from .dependency_import import DependencyImport
+from pythoneda.shared import primary_key_attribute
 
 
-class PythonImport(BaseObject):
+class PythonImport(DependencyImport):
     """
     Models Python imports.
 
-    Class name: PythonImports
+    Class name: PythonImport
 
     Responsibilities:
-        - Represent a Python import
+        - Represent a Python import.
 
     Collaborators:
         - None
@@ -43,19 +44,8 @@ class PythonImport(BaseObject):
         :param asset: The name of the asset.
         :type asset: str
         """
-        super().__init__()
-        self._package = package
+        super().__init__(package)
         self._asset = asset
-
-    @property
-    @primary_key_attribute
-    def package(self) -> str:
-        """
-        Retrieves the package
-        :return: Such package.
-        :rtype: str
-        """
-        return self._package
 
     @property
     @primary_key_attribute

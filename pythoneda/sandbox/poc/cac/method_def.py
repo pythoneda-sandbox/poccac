@@ -20,6 +20,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import abc
+from .dependency_import import DependencyImport
 from pythoneda.shared import attribute, primary_key_attribute, ValueObject
 from .method_parameter import MethodParameter
 from typing import Callable, List
@@ -46,6 +47,7 @@ class MethodDef(ValueObject):
         parameters: List[MethodParameter] = [],
         returnDoc: str = None,
         method: Callable = None,
+        typeImports: List[DependencyImport] = [],
     ):
         """
         Creates a new MethodDef instance.
@@ -61,6 +63,8 @@ class MethodDef(ValueObject):
         :type returnDoc: str
         :param method: The method instance.
         :type method: Callable
+        :param typeImports: The type imports.
+        :type typeImports: List[pythoneda.sandbox.poc.cac.DependencyImport]
         """
         super().__init__()
         self._name = name
@@ -69,6 +73,7 @@ class MethodDef(ValueObject):
         self._parameters = parameters
         self._return_doc = returnDoc
         self._method = method
+        self._type_imports = typeImports
 
     @classmethod
     def from_method(cls, method: Callable) -> "MethodDef":
@@ -156,6 +161,16 @@ class MethodDef(ValueObject):
         :rtype: Callable
         """
         return self._method
+
+    @property
+    @attribute
+    def type_imports(self) -> List[DependencyImport]:
+        """
+        Retrieves the type imports.
+        :return: Such list.
+        :rtype: List[pythoneda.sandbox.poc.cac.DependencyImport]
+        """
+        return self._type_imports
 
     @property
     @abc.abstractmethod

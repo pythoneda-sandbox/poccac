@@ -26,7 +26,7 @@ import os
 import pytest
 from pythoneda.shared import BaseObject
 from pythoneda.sandbox.poc.cac import (
-    ClassDef,
+    ClassArtifact,
     DefaultMethodBindingCriteria,
     PythonConstructorDef,
     PythonMethodDef,
@@ -88,7 +88,7 @@ async def test_TODO_rename_(name: str):
         )
     )
     methods.append(PythonMethodDef("components", "List", "Retrieves the components."))
-    sut = ClassDef(
+    sut = ClassArtifact(
         "Sample",
         [BaseObject],
         constructor_def,

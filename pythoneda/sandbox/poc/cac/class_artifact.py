@@ -124,7 +124,7 @@ class ClassArtifact(BaseObject):
 
         if cls.has_explicit_constructor(target):
             constructor = OfficialPythonMethod(
-                MethodDef.from_method(target.__init__), target.__init__
+                MethodDef.from_method(target.__init__), target.__init__, target
             )
 
         methods = list(target.__dict__.items())
@@ -139,7 +139,10 @@ class ClassArtifact(BaseObject):
             target.__name__,
             target.__bases__,
             constructor,
-            [OfficialPythonMethod(MethodDef.from_method(m), m) for m in methods],
+            [
+                OfficialPythonMethod(MethodDef.from_method(m), m, target)
+                for m in methods
+            ],
             metadata,
             DefaultMethodBindingCriteria(),
         )
@@ -352,7 +355,12 @@ along with this program.  If not, see https://www.gnu.org/licenses."""
         :return: Such imports.
         :rtype: List[pythoneda.sandbox.poc.cac.python_import.PythonImport]
         """
-        return []
+        result = self.metadata.get("imports", [])
+        for m in self.method_definitions:
+            result.extend(m.type_imports)
+        for m in self.methods:
+            result.extend(m.imports)
+        return result
 
     @property
     def constructor(self) -> PythonMethod:
