@@ -115,7 +115,7 @@ class PythonImportFind(ast.NodeVisitor, BaseObject):
         :param node: The node to visit.
         :type node: ast.Import
         """
-        if self.method_name or self._in_target_method:
+        if not self.method_name or self._in_target_method:
             for alias in node.names:
                 self._imports.append(PythonImport(alias.name))
             self.generic_visit(node)
@@ -126,7 +126,7 @@ class PythonImportFind(ast.NodeVisitor, BaseObject):
         :param node: The node to visit.
         :type node: ast.FunctionDef
         """
-        if self.method_name or self._in_target_method:
+        if not self.method_name or self._in_target_method:
             module = node.module if node.module else "built-in"
             for alias in node.names:
                 imported = (

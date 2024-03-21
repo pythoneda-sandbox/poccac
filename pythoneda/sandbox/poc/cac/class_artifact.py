@@ -21,6 +21,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 from io import StringIO
 from .default_method_binding_criteria import DefaultMethodBindingCriteria
+from .dependency_import import DependencyImport
 from .empty_body_python_method import EmptyBodyPythonMethod
 from .method_binding_criteria import MethodBindingCriteria
 from .method_def import MethodDef
@@ -28,6 +29,7 @@ from .method_parameter import MethodParameter
 from .official_python_method import OfficialPythonMethod
 import os
 from .python_import import PythonImport
+from .python_import_find import PythonImportFind
 from .python_method_def import PythonMethodDef
 from .python_method import PythonMethod
 from pythoneda.shared import BaseObject
@@ -110,8 +112,9 @@ class ClassArtifact(BaseObject):
         import inspect
 
         source_file = inspect.getfile(target)
+        class_imports = cls.class_imports_of(target)
         metadata = {
-            "relative_file_path": "sample.py",
+            "relative_file_path": source_file,
             "module_name": target.__module__,
             "author": "rydnr",
             "start_year": "2024",
@@ -119,7 +122,11 @@ class ClassArtifact(BaseObject):
             "class_description": "Models the Sample abstraction.",
             "class_responsibilities": "Represent the Sample abstraction.",
             "class_collaborators": "None",
+            "source": inspect.getsource(target),
+            "module_source": inspect.getsource(inspect.getmodule(target)),
+            "class_imports": class_imports,
         }
+
         constructor = None
 
         if cls.has_explicit_constructor(target):
@@ -155,6 +162,33 @@ class ClassArtifact(BaseObject):
         :rtype: str
         """
         return self._name
+
+    @property
+    def parents(self) -> List[Type]:
+        """
+        Retrieves the class parents.
+        :return: Such parents.
+        :rtype: List[Type]
+        """
+        return self._parents
+
+    @property
+    def constructor(self) -> PythonMethod:
+        """
+        Retrieves the class constructor.
+        :return: Such constructor.
+        :rtype: pythoneda.sandbox.poc.cac.PythonMethod
+        """
+        return self._constructor
+
+    @property
+    def methods(self) -> List[PythonMethod]:
+        """
+        Retrieves the class methods.
+        :return: Such methods.
+        :rtype: List[pythoneda.sandbox.poc.cac.PythonMethod]
+        """
+        return self._methods
 
     @property
     def metadata(self) -> Dict[str, str]:
@@ -301,15 +335,6 @@ along with this program.  If not, see https://www.gnu.org/licenses."""
         return "\n// ".join(self.copyright_preamble.split("\n"))
 
     @property
-    def parents(self) -> List[str]:
-        """
-        Retrieves the parents.
-        :return: Such parents.
-        :rtype: List[str]
-        """
-        return self._parents
-
-    @property
     def class_description(self) -> str:
         """
         Retrieves the class description.
@@ -349,27 +374,27 @@ along with this program.  If not, see https://www.gnu.org/licenses."""
         return result
 
     @property
-    def imports(self) -> List[PythonImport]:
+    def class_imports(self) -> List[PythonImport]:
         """
         Retrieves the imports.
         :return: Such imports.
         :rtype: List[pythoneda.sandbox.poc.cac.python_import.PythonImport]
         """
-        result = self.metadata.get("imports", [])
+        return self.metadata.get("class_imports", [])
+
+    @property
+    def method_imports(self) -> List[PythonImport]:
+        """
+        Retrieves the method imports.
+        :return: Such imports.
+        :rtype: List[pythoneda.sandbox.poc.cac.python_import.PythonImport]
+        """
+        result = []
         for m in self.method_definitions:
             result.extend(m.type_imports)
         for m in self.methods:
             result.extend(m.imports)
         return result
-
-    @property
-    def constructor(self) -> PythonMethod:
-        """
-        Retrieves the constructor definition.
-        :return: Such constructor definition.
-        :rtype: pythoneda.sandbox.poc.cac..PythonConstructorDef
-        """
-        return self._constructor
 
     @property
     def method_definitions(self) -> List[PythonMethod]:
@@ -379,15 +404,6 @@ along with this program.  If not, see https://www.gnu.org/licenses."""
         :rtype: List[pythoneda.sandbox.poc.cac.PythonMethodDef]
         """
         return [m.method_def for m in self._methods]
-
-    @property
-    def methods(self) -> List[PythonMethod]:
-        """
-        Retrieves the methods.
-        :return: Such methods.
-        :rtype: List[pythoneda.sandbox.poc.cac.PythonMethod]
-        """
-        return self._methods
 
     @property
     def template(self) -> str:
@@ -429,8 +445,10 @@ class <inst.name>(<parents(parents=inst.parents)>):
 
     Collaborators:
         <collaborators(collaborators=inst.class_collaborators)>
-    """
-    <inst.constructor.content>
+    """<if(inst.constructor)>
+
+
+    <inst.constructor.body><endif>
 <if(inst.methods)>
 
 <methods(methods=inst.methods)><endif>
@@ -481,6 +499,9 @@ root(inst) ::= <<
 
 <inst.copyright_preamble>
 """
+<if(inst.class_imports)><imports(inst.class_imports)>
+
+<endif>
 
 
 <class(inst=inst)>
@@ -504,16 +525,42 @@ root(inst) ::= <<
 
         return str(root_template)
 
-    async def rename_imports(self, oldName: str, newName: str) -> None:
+    async def rename_imports(
+        self,
+        oldPackage: str,
+        newPackage: str,
+        oldAsset: str = None,
+        newAsset: str = None,
+    ) -> None:
         """
-        Renames the imports.
-        :param oldName: The old name.
-        :type oldName: str
-        :param newName: The new name.
-        :type newName: str
+        Renames the matching imports.
+        :param oldPackage: The old package.
+        :type oldPackage: str
+        :param newPackage: The new package.
+        :type newPackage: str
+        :param oldAsset: The old asset.
+        :type oldAsset: str
+        :param newAsset: The new asset.
+        :type newAsset: str
         """
-        for imp in self.imports:
-            await imp.rename(oldName, newName)
+        aux = self.class_imports
+        aux.extend(self.method_imports)
+        for imp in aux:
+            await imp.rename(oldPackage, newPackage, oldAsset, newAsset)
+
+    @classmethod
+    def class_imports_of(cls, target: Type) -> List[DependencyImport]:
+        """
+        Retrieves the imports of the class.
+        :param target: The target class.
+        :type target: Type
+        :return: The imports.
+        :rtype: List[pythoneda.sandbox.poc.cac.DependencyImport]
+        """
+        import inspect
+
+        module = inspect.getmodule(target)
+        return PythonImportFind(inspect.getsource(module)).imports
 
 
 # vim: syntax=python ts=4 sw=4 sts=4 tw=79 sr et

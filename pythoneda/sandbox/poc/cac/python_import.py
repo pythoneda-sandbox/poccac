@@ -57,6 +57,29 @@ class PythonImport(DependencyImport):
         """
         return self._asset
 
+    async def rename(
+        self,
+        oldPackage: str,
+        newPackage: str,
+        oldAsset: str = None,
+        newAsset: str = None,
+    ):
+        """
+        Renames the import to a new name.
+        :param oldPackage: The old package.
+        :type oldPackage: str
+        :param newPackage: The new package.
+        :type newPackage: str
+        :param oldAsset: The old asset.
+        :type oldAsset: str
+        :param newAsset: The new asset.
+        :type newAsset: str
+        """
+        if self._package == oldPackage:
+            self._package = newPackage
+            if oldAsset and self._asset == oldAsset:
+                self._asset = newAsset
+
 
 # vim: syntax=python ts=4 sw=4 sts=4 tw=79 sr et
 # Local Variables:
