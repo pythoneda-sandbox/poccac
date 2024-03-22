@@ -58,6 +58,7 @@ class ClassArtifact(BaseObject):
         methods: List[PythonMethod],
         metadata: Dict[str, str],
         methodBindingCriteria: MethodBindingCriteria = None,
+        target: Type = None,
     ):
         """
         Creates a new Artifact instance.
@@ -73,6 +74,8 @@ class ClassArtifact(BaseObject):
         :type metadata: Dict[str, str]
         :param methodBindingCriteria: The criteria for binding methods.
         :type methodBindingCriteria: pythoneda.sandbox.poc.cac.MethodBindingCriteria
+        :param target: The target class.
+        :type target: Type
         """
         super().__init__()
         self._name = name
@@ -81,6 +84,7 @@ class ClassArtifact(BaseObject):
         self._methods = methods
         self._metadata = metadata
         self._method_binding_criteria = methodBindingCriteria
+        self._target = target
 
     @classmethod
     def has_explicit_constructor(cls, target) -> bool:
@@ -152,6 +156,7 @@ class ClassArtifact(BaseObject):
             ],
             metadata,
             DefaultMethodBindingCriteria(),
+            target,
         )
 
     @property
@@ -209,13 +214,27 @@ class ClassArtifact(BaseObject):
         return self._method_binding_criteria
 
     @property
+    def target(self) -> Type:
+        """
+        Retrieves the target class.
+        :return: Such class.
+        :rtype: Type
+        """
+        return self._target
+
+    @property
     def module_name(self) -> str:
         """
         Retrieves the module name.
         :return: Such information.
         :rtype: str
         """
-        result = self.metadata.get("module_name", None)
+        result = None
+        if self.target is None:
+            result = self.metadata.get("module_name", None)
+        else:
+            result = self.target.__module__
+
         if result is None:
             result = "[unknown module]"
             self.metadata["module_name"] = result
@@ -547,6 +566,21 @@ root(inst) ::= <<
         aux.extend(self.method_imports)
         for imp in aux:
             await imp.rename(oldPackage, newPackage, oldAsset, newAsset)
+        if any(parent.__name__ == oldAsset for parent in self.parents):
+            import importlib
+
+            new_module = importlib.import_module(newPackage)
+            new_parent = getattr(new_module, newAsset)
+            self._parents = [
+                new_parent if parent.__name__ == oldAsset else parent
+                for parent in self.parents
+            ]
+            if self.target:
+                self._target.__bases__ = tuple(self.parents)
+            else:
+                self._target = type(
+                    self.name, tuple(self.parents), dict(self.target.__dict__)
+                )
 
     @classmethod
     def class_imports_of(cls, target: Type) -> List[DependencyImport]:
