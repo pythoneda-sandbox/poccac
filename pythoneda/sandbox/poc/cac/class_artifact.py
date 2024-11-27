@@ -20,6 +20,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 from io import StringIO
+from .artifact_metadata import ArtifactMetadata
 from .default_method_binding_criteria import DefaultMethodBindingCriteria
 from .dependency_import import DependencyImport
 from .empty_body_python_method import EmptyBodyPythonMethod
@@ -56,7 +57,7 @@ class ClassArtifact(BaseObject):
         parents: List[str],
         constructor: PythonMethod,
         methods: List[PythonMethod],
-        metadata: Dict[str, str],
+        metadata: ArtifactMetadata,
         methodBindingCriteria: MethodBindingCriteria = None,
         target: Type = None,
     ):
@@ -71,7 +72,7 @@ class ClassArtifact(BaseObject):
         :param methods: The method definitions.
         :type methods: List[pythoneda.sandbox.poc.cac.PythoMethodDef]
         :param metadata: The metadata.
-        :type metadata: Dict[str, str]
+        :type metadata: pythoneda.sandbox.poc.cac.ArtifactMetadata
         :param methodBindingCriteria: The criteria for binding methods.
         :type methodBindingCriteria: pythoneda.sandbox.poc.cac.MethodBindingCriteria
         :param target: The target class.
@@ -117,19 +118,21 @@ class ClassArtifact(BaseObject):
 
         source_file = inspect.getfile(target)
         class_imports = cls.class_imports_of(target)
-        metadata = {
-            "relative_file_path": source_file,
-            "module_name": target.__module__,
-            "author": "rydnr",
-            "start_year": "2024",
-            "ref_url": "https://github.com/pythoneda-sandbox/poccac",
-            "class_description": "Models the Sample abstraction.",
-            "class_responsibilities": "Represent the Sample abstraction.",
-            "class_collaborators": "None",
-            "source": inspect.getsource(target),
-            "module_source": inspect.getsource(inspect.getmodule(target)),
-            "class_imports": class_imports,
-        }
+        metadata = ArtifactMetadata.from_dict(
+            {
+                "relative_file_path": source_file,
+                "module_name": target.__module__,
+                "author": "rydnr",
+                "start_year": "2024",
+                "ref_url": "https://github.com/pythoneda-sandbox/poccac",
+                "class_description": "Models the Sample abstraction.",
+                "class_responsibilities": "Represent the Sample abstraction.",
+                "class_collaborators": "None",
+                "source": inspect.getsource(target),
+                "module_source": inspect.getsource(inspect.getmodule(target)),
+                "class_imports": class_imports,
+            }
+        )
 
         constructor = None
 
@@ -142,7 +145,7 @@ class ClassArtifact(BaseObject):
         methods = [
             m
             for _, m in methods
-            if inspect.isfunction(m)
+            if (inspect.isfunction(m) and not m.__name__ == "__init__")
             or isinstance(m, property)
             or isinstance(m, classmethod)
         ]
@@ -231,13 +234,9 @@ class ClassArtifact(BaseObject):
         """
         result = None
         if self.target is None:
-            result = self.metadata.get("module_name", None)
+            result = self.metadata.get("module_name", lambda: "[unknown module]")
         else:
             result = self.target.__module__
-
-        if result is None:
-            result = "[unknown module]"
-            self.metadata["module_name"] = result
 
         return result
 
@@ -248,14 +247,7 @@ class ClassArtifact(BaseObject):
         :return: Such information.
         :rtype: int
         """
-        result = self.metadata.get("start_year", None)
-        if result is None:
-            import datetime
-
-            result = datetime.datetime.now().year
-            self.metadata["start_year"] = result
-
-        return result
+        return self.metadata.start_year
 
     @property
     def author(self) -> str:
@@ -264,12 +256,7 @@ class ClassArtifact(BaseObject):
         :return: Such information.
         :rtype: str
         """
-        result = self.metadata.get("author", None)
-        if result is None:
-            result = "[unknown author]"
-            self.metadata["author"] = result
-
-        return result
+        return self.metadata.author
 
     @property
     def ref_url(self) -> str:
@@ -278,12 +265,7 @@ class ClassArtifact(BaseObject):
         :return: Such information.
         :rtype: str
         """
-        result = self.metadata.get("ref_url", None)
-        if result is None:
-            result = "[unknown url]"
-            self.metadata["ref_url"] = result
-
-        return result
+        return self.metadata.ref_url
 
     @property
     def relative_file_path(self) -> str:
@@ -292,16 +274,17 @@ class ClassArtifact(BaseObject):
         :return: Such path.
         :rtype: str
         """
-        result = self.metadata.get("relative_file_path", None)
+        result = self.metadata.get("relative_file_path", lambda: None)
         if result is None:
             module_name = self.metadata.get("module_name", None)
-            result = (
-                os.path.sep.join(module_name.split("."))
-                + os.path.sep
-                + self.__class__.camel_to_snake(name)
-                + ".py"
-            )
-            self.metadata["relative_file_path"] = result
+            if module_name:
+                result = (
+                    os.path.sep.join(module_name.split("."))
+                    + os.path.sep
+                    + self.__class__.camel_to_snake(name)
+                    + ".py"
+                )
+            self.metadata.set("relative_file_path", result)
 
         return result
 
@@ -312,11 +295,9 @@ class ClassArtifact(BaseObject):
         :return: Such description.
         :rtype: str
         """
-        result = self.metadata.get("file_description", None)
-        if result is None:
-            result = f"This file defines the {self.name} class."
-            self.metadata["file_description"] = result
-        return result
+        return self.metadata.get(
+            "file_description", f"This file defines the {self.name} class."
+        )
 
     @property
     def copyright_preamble(self) -> str:
@@ -325,24 +306,7 @@ class ClassArtifact(BaseObject):
         :return: Such content.
         :rtype: str
         """
-        result = self.metadata.get("copyright_preamble", None)
-        if result is None:
-            result = f"""Copyright (C) {self.start_year}-today {self.author}'s {self.ref_url}
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see https://www.gnu.org/licenses."""
-
-        return result
+        return self.metadata.copyright_preamble
 
     @property
     def copyright_preamble_for_st(self) -> str:
@@ -351,7 +315,7 @@ along with this program.  If not, see https://www.gnu.org/licenses."""
         :return: Such content.
         :rtype: str
         """
-        return "\n// ".join(self.copyright_preamble.split("\n"))
+        return self.metadata.copyright_preamble_for_st
 
     @property
     def class_description(self) -> str:
@@ -360,11 +324,7 @@ along with this program.  If not, see https://www.gnu.org/licenses."""
         :return: Such description.
         :rtype: str
         """
-        result = self.metadata.get("class_description", None)
-        if result is None:
-            result = "[no description]"
-            self.metadata["class_description"] = result
-        return result
+        return self.metadata.get("class_description", lambda: "[no description]")
 
     @property
     def class_responsibilities(self) -> List[str]:
@@ -373,11 +333,7 @@ along with this program.  If not, see https://www.gnu.org/licenses."""
         :return: Such responsibilities.
         :rtype: List[str]
         """
-        result = self.metadata.get("class_responsibilities", None)
-        if result is None:
-            result = []
-            self.metadata["class_responsibilities"] = result
-        return result
+        return self.metadata.get("class_responsibilities", lambda: [])
 
     @property
     def class_collaborators(self) -> List[str]:
@@ -386,11 +342,7 @@ along with this program.  If not, see https://www.gnu.org/licenses."""
         :return: Such collaborators.
         :rtype: List[str]
         """
-        result = self.metadata.get("class_collaborators", None)
-        if result is None:
-            result = []
-            self.metadata["class_collaborators"] = result
-        return result
+        return self.metadata.get("class_collaborators", lambda: [])
 
     @property
     def class_imports(self) -> List[PythonImport]:
@@ -399,7 +351,7 @@ along with this program.  If not, see https://www.gnu.org/licenses."""
         :return: Such imports.
         :rtype: List[pythoneda.sandbox.poc.cac.python_import.PythonImport]
         """
-        return self.metadata.get("class_imports", [])
+        return self.metadata.get("class_imports", lambda: [])
 
     @property
     def method_imports(self) -> List[PythonImport]:
@@ -467,7 +419,7 @@ class <inst.name>(<parents(parents=inst.parents)>):
     """<if(inst.constructor)>
 
 
-    <inst.constructor.body><endif>
+<inst.constructor.body><endif>
 <if(inst.methods)>
 
 <methods(methods=inst.methods)><endif>
@@ -502,8 +454,7 @@ editor_settings() ::= <<
 // methods template
 // - methods: The methods.
 methods(methods) ::= <<
-<methods: {{ method |<method.method_def.content>
-    <method.body>}}; separator="\n\n" >
+<methods: {{ method |<method.body>}}; separator="\n\n" >
 >>
 
 //  root template
@@ -581,6 +532,24 @@ root(inst) ::= <<
                 self._target = type(
                     self.name, tuple(self.parents), dict(self.target.__dict__)
                 )
+
+    async def rename(self, newName: str) -> None:
+        """
+        Renames the class.
+        :param newName: The new name.
+        :type newName: str
+        """
+        self._name = newName
+        import types
+
+        new_module = types.ModuleType(
+            self.module_name.split(".")[:-1],
+            ".",
+            self.__class__.camel_to_snake(newName),
+        )
+        #        print(self.content)
+        exec(self.content, new_module.__dict__)
+        self._target = getattr(new_module, newName)
 
     @classmethod
     def class_imports_of(cls, target: Type) -> List[DependencyImport]:
